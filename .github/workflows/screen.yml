@@ -2,9 +2,13 @@ name: Daily Put Screener
 
 on:
   schedule:
-    # 13:45 UTC = 9:45am ET during EDT (roughly 8:45am ET during EST, Nov-Mar).
-    # Runs Mon-Fri only. Adjust if you want a different pre/post-open time.
-    - cron: "45 13 * * 1-5"
+    # 15:30 UTC -- always at least 60 min after the 9:30am ET market open,
+    # in both DST states (GitHub Actions cron is fixed UTC, no DST awareness):
+    #   EST (Nov-Mar): 10:30am ET = exactly 60 min after open
+    #   EDT (Mar-Nov): 11:30am ET = 120 min after open (extra buffer, never less)
+    # Running before open risks stale/empty option quotes; running right at
+    # open risks wide opening-auction spreads. Runs Mon-Fri only.
+    - cron: "30 15 * * 1-5"
   workflow_dispatch: {}  # allows manually triggering a run from the Actions tab
 
 jobs:

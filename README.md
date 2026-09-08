@@ -72,9 +72,11 @@ secret**. Add each of:
 - `TELEGRAM_CHAT_ID`
 
 That's it. The workflow in `.github/workflows/screen.yml` runs every weekday
-at 13:45 UTC (~9:45am ET) and will message you the picks. You can also
-trigger it manually anytime from the **Actions** tab → "Daily Put Screener"
-→ **Run workflow**.
+at 15:30 UTC (10:30am ET in winter / 11:30am ET in summer -- always at least
+60 minutes after the 9:30am ET market open, so option quotes have had time
+to populate and opening-auction spreads have settled) and will message you
+the picks. You can also trigger it manually anytime from the **Actions** tab
+→ "Daily Put Screener" → **Run workflow**.
 
 ## Running locally (for testing before you push)
 
