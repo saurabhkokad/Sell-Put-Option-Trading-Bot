@@ -1,0 +1,27 @@
+# Screening criteria for the cash-secured put screener.
+# Tune these to match your risk appetite. All numeric filters are inclusive.
+
+universe:
+  min_market_cap: 10_000_000_000   # $10B+ = large cap only
+  # Skip a ticker if it has earnings scheduled before the option expiration.
+  # Earnings can cause large overnight moves that blow through short put strikes.
+  avoid_earnings_before_expiration: true
+
+expiration:
+  dte_min: 30
+  dte_max: 45
+
+option_filters:
+  # Put delta is negative; we compare against the absolute value.
+  # 0.10-0.30 is the classic "high probability OTM" put-selling range.
+  abs_delta_min: 0.10
+  abs_delta_max: 0.30
+  min_iv: 0.25                 # 25% implied volatility floor ("high IV")
+  min_open_interest: 100
+  min_volume: 0                # set > 0 to require same-day volume
+  max_bid_ask_spread_pct: 0.15 # (ask-bid)/mid must be below this
+  min_bid: 0.05                # ignore worthless/illiquid quotes
+
+scoring:
+  min_annualized_return_pct: 8.0   # premium annualized as % of capital at risk
+  max_results: 12                  # how many picks to include in the notification

@@ -1,0 +1,31 @@
+name: Daily Put Screener
+
+on:
+  schedule:
+    # 13:45 UTC = 9:45am ET during EDT (roughly 8:45am ET during EST, Nov-Mar).
+    # Runs Mon-Fri only. Adjust if you want a different pre/post-open time.
+    - cron: "45 13 * * 1-5"
+  workflow_dispatch: {}  # allows manually triggering a run from the Actions tab
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run screener
+        env:
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_API_SECRET_KEY: ${{ secrets.ALPACA_API_SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
