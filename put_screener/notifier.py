@@ -15,8 +15,21 @@ from .screener import PutOpportunity
 
 _TELEGRAM_MAX_LEN = 4096
 
-_COLUMNS = ("SYM", "SPOT", "EXP", "STRK", "DTE", "BID", "DLT", "IV%", "ANN%")
-_ROW_FORMAT = "{:<5} {:>5} {:>5} {:>4} {:>3} {:>5} {:>4} {:>3} {:>5}"
+_COLUMNS = (
+    "SYM",
+    "SPOT",
+    "EXP",
+    "STRK",
+    "DTE",
+    "BID",
+    "DLT",
+    "IV%",
+    "ANN%",
+    "OI",
+    "SPRD%",
+    "CAPITAL",
+)
+_ROW_FORMAT = "{:<5} {:>5} {:>5} {:>4} {:>3} {:>5} {:>4} {:>3} {:>5} {:>6} {:>5} {:>8}"
 
 
 def _format_table(opportunities: list[PutOpportunity]) -> str:
@@ -25,6 +38,7 @@ def _format_table(opportunities: list[PutOpportunity]) -> str:
 
     for o in opportunities:
         exp_short = datetime.strptime(o.expiration, "%Y-%m-%d").strftime("%m/%d")
+        spread_pct = (o.ask - o.bid) / o.mid * 100 if o.mid > 0 else 0.0
         rows.append(
             _ROW_FORMAT.format(
                 o.symbol,
@@ -36,6 +50,9 @@ def _format_table(opportunities: list[PutOpportunity]) -> str:
                 f"{o.delta:.2f}",
                 f"{o.iv * 100:.0f}",
                 f"{o.annualized_return_pct:.1f}",
+                f"{o.open_interest:,}",
+                f"{spread_pct:.1f}",
+                f"{o.capital_required:,.0f}",
             )
         )
 

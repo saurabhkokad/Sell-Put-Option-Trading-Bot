@@ -17,7 +17,20 @@ import matplotlib.pyplot as plt
 
 from .screener import PutOpportunity
 
-_COLUMNS = ["Sym", "Spot", "Exp", "Strike", "DTE", "Bid", "Delta", "IV%", "Ann%"]
+_COLUMNS = [
+    "Sym",
+    "Spot",
+    "Exp",
+    "Strike",
+    "DTE",
+    "Bid",
+    "Delta",
+    "IV%",
+    "Ann%",
+    "OI",
+    "Spread%",
+    "Capital",
+]
 _HEADER_COLOR = "#2c3e50"
 _HEADER_TEXT_COLOR = "white"
 _ROW_COLORS = ["#ffffff", "#f2f2f2"]
@@ -27,6 +40,7 @@ _FONT_SIZE = 11
 
 def _row_values(o: PutOpportunity) -> list[str]:
     exp_short = datetime.strptime(o.expiration, "%Y-%m-%d").strftime("%m/%d")
+    spread_pct = (o.ask - o.bid) / o.mid * 100 if o.mid > 0 else 0.0
     return [
         o.symbol,
         f"${o.underlying_price:,.2f}",
@@ -37,6 +51,9 @@ def _row_values(o: PutOpportunity) -> list[str]:
         f"{o.delta:.2f}",
         f"{o.iv * 100:.0f}%",
         f"{o.annualized_return_pct:.1f}%",
+        f"{o.open_interest:,}",
+        f"{spread_pct:.1f}%",
+        f"${o.capital_required:,.0f}",
     ]
 
 
@@ -44,8 +61,9 @@ def render_table_image(opportunities: list[PutOpportunity]) -> bytes:
     rows = [_row_values(o) for o in opportunities]
     n_rows = len(rows)
 
+    fig_width = 1.1 * len(_COLUMNS)
     fig_height = 1.0 + n_rows * (_ROW_HEIGHT * 0.3)
-    fig, ax = plt.subplots(figsize=(9, fig_height))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     ax.axis("off")
 
     ax.set_title(
