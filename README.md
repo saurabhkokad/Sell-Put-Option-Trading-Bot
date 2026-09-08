@@ -51,6 +51,18 @@ never places trades.
 
 ### 3. Push this project to GitHub
 
+If you're using VS Code and are already signed into GitHub there, this is
+the easiest path:
+
+1. In a terminal, `cd` into the project and run `git init`, then commit
+   everything (`git add .` and `git commit -m "Initial put screener"`).
+2. Open the **Source Control** panel in VS Code (`Cmd+Shift+G`) and click
+   **Publish Branch**. Pick your GitHub account and choose **private** (this
+   repo has your specific thresholds/strategy in `config.yaml`, even though
+   it contains no secrets). VS Code creates the repo and pushes for you.
+
+Otherwise, create an empty repo on github.com yourself and push manually:
+
 ```bash
 cd "Sell Put Option Trading Bot"
 git init
@@ -124,9 +136,12 @@ All thresholds live in `config.yaml`:
 | `min_annualized_return_pct` | Minimum annualized yield to bother showing you |
 | `max_results` | How many picks show up in the notification |
 
-Each pick's notification includes `capital_required` (strike × 100) — position
-sizing across your $100K is left to you rather than enforced by the screener,
-since a single contract on a mega-cap name can already run $20K-$60K+.
+Each pick's table row shows spot price, expiration, strike, DTE, bid, delta,
+IV, annualized return, open interest, and bid-ask spread — everything needed
+to judge a pick at a glance. Capital required per contract is just strike ×
+100 (not shown, since it's directly derivable), and position sizing across
+your $100K is left to you rather than enforced by the screener, since a
+single contract on a mega-cap name can already run $20K-$60K+.
 
 ## Important caveats — please read
 
