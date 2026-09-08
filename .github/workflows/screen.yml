@@ -2,24 +2,25 @@ name: Daily Put Screener
 
 on:
   schedule:
-    # Primary: 15:37 UTC -- at least 60 min after the 9:30am ET market open,
-    # in both DST states (GitHub Actions cron is fixed UTC, no DST awareness):
-    #   EST (Nov-Mar): 10:37am ET = ~67 min after open
-    #   EDT (Mar-Nov): 11:37am ET = ~127 min after open (extra buffer, never less)
-    # Running before open risks stale/empty option quotes; running right at
-    # open risks wide opening-auction spreads.
+    # Primary: 10:37am America/New_York, every weekday -- ~67 min after the
+    # 9:30am ET market open, every day of the year, DST handled natively by
+    # GitHub Actions' timezone field (added March 2026). Running before open
+    # risks stale/empty option quotes; running right at open risks wide
+    # opening-auction spreads.
     #
     # Off-minute (":37" not ":30"/":00") deliberately avoids GitHub Actions'
     # documented congestion points (top of hour, :00/:15/:30/:45), where
     # scheduled runs can be delayed or silently skipped entirely under load.
     #
-    # Backup: 17:42 UTC, ~2 hours later, in case the primary got skipped --
-    # the job checks for today's picks file first and no-ops if it already
-    # ran, so this doesn't duplicate a successful primary run.
-    #
-    # Both run Mon-Fri only.
-    - cron: "37 15 * * 1-5"
-    - cron: "42 17 * * 1-5"
+    # Backup: 12:42pm America/New_York, ~2 hours later, in case the primary
+    # got dropped or badly delayed -- the job checks for today's picks file
+    # first and no-ops if it already ran, so this doesn't duplicate a
+    # successful primary run. This is pure scheduler-reliability redundancy,
+    # unrelated to timezone/DST handling.
+    - cron: "37 10 * * 1-5"
+      timezone: "America/New_York"
+    - cron: "42 12 * * 1-5"
+      timezone: "America/New_York"
   workflow_dispatch: {}  # allows manually triggering a run from the Actions tab
 
 permissions:
