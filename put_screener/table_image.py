@@ -33,9 +33,16 @@ _COLUMNS = [
 _HEADER_COLOR = "#2c3e50"
 _HEADER_TEXT_COLOR = "white"
 _ROW_COLORS = ["#ffffff", "#f2f2f2"]
-_ROW_HEIGHT = 0.6
 _FONT_SIZE = 15
 _DPI = 100
+
+# All measurements in inches. The table gets an explicit bbox sized to fit
+# exactly this many rows, with title/bottom margins reserved outside of it --
+# this guarantees no overlap regardless of row count (a table placed with
+# loc="center" instead can auto-center and overflow past its axes' top edge).
+_ROW_HEIGHT_IN = 0.48
+_TITLE_MARGIN_IN = 0.8
+_BOTTOM_MARGIN_IN = 0.35
 
 
 def _format_spread(o: PutOpportunity) -> str:
@@ -63,11 +70,16 @@ def _row_values(o: PutOpportunity) -> list[str]:
 
 def render_table_image(opportunities: list[PutOpportunity]) -> bytes:
     rows = [_row_values(o) for o in opportunities]
-    n_rows = len(rows)
+    n_display_rows = len(rows) + 1  # +1 for the header row
 
     fig_width = 0.95 * len(_COLUMNS)
-    fig_height = 1.0 + n_rows * (_ROW_HEIGHT * 0.35)
+    table_height_in = n_display_rows * _ROW_HEIGHT_IN
+    fig_height = _TITLE_MARGIN_IN + table_height_in + _BOTTOM_MARGIN_IN
+
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    axes_bottom = _BOTTOM_MARGIN_IN / fig_height
+    axes_top = 1 - (_TITLE_MARGIN_IN / fig_height)
+    fig.subplots_adjust(left=0.02, right=0.98, bottom=axes_bottom, top=axes_top)
     ax.axis("off")
 
     ax.set_title(
@@ -81,11 +93,10 @@ def render_table_image(opportunities: list[PutOpportunity]) -> bytes:
         cellText=rows,
         colLabels=_COLUMNS,
         cellLoc="center",
-        loc="center",
+        bbox=[0, 0, 1, 1],  # fill the axes region exactly -- no auto-overflow
     )
     table.auto_set_font_size(False)
     table.set_fontsize(_FONT_SIZE)
-    table.scale(1, _ROW_HEIGHT * 3)
     table.auto_set_column_width(col=list(range(len(_COLUMNS))))
 
     for (row, _col), cell in table.get_celld().items():
@@ -97,7 +108,7 @@ def render_table_image(opportunities: list[PutOpportunity]) -> bytes:
             cell.set_facecolor(_ROW_COLORS[row % 2])
 
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=_DPI, bbox_inches="tight")
+    fig.savefig(buf, format="png", dpi=_DPI, bbox_inches="tight", pad_inches=0.25)
     plt.close(fig)
     buf.seek(0)
     return buf.read()
