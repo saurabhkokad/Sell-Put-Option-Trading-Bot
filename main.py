@@ -8,6 +8,7 @@ import sys
 from datetime import date
 
 from put_screener.config import load_config
+from put_screener.export import write_picks_json
 from put_screener.notifier import (
     format_message,
     send_telegram_message,
@@ -47,6 +48,9 @@ def main() -> int:
 
     picks = rank_and_select(opportunities, cfg)
     log.info("Selected %d final picks", len(picks))
+
+    json_path = write_picks_json(picks, len(universe), len(opportunities))
+    log.info("Wrote picks to %s", json_path)
 
     message = format_message(picks)
     print(message)
