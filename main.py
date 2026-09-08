@@ -5,10 +5,17 @@ import logging
 import os
 import sys
 
+from datetime import date
+
 from put_screener.config import load_config
-from put_screener.notifier import format_message, send_telegram_message
+from put_screener.notifier import (
+    format_message,
+    send_telegram_message,
+    send_telegram_photo,
+)
 from put_screener.scoring import rank_and_select
 from put_screener.screener import run_screen
+from put_screener.table_image import render_table_image
 from put_screener.universe import get_universe
 
 try:
@@ -44,8 +51,18 @@ def main() -> int:
     message = format_message(picks)
     print(message)
 
+    if picks:
+        try:
+            image_bytes = render_table_image(picks)
+            caption = f"Put Screener - {date.today().isoformat()}"
+            send_telegram_photo(image_bytes, caption, cfg)
+            log.info("Notification sent (image).")
+            return 0
+        except Exception as exc:
+            log.warning("Image notification failed, falling back to text: %s", exc)
+
     send_telegram_message(message, cfg)
-    log.info("Notification sent.")
+    log.info("Notification sent (text).")
     return 0
 
 

@@ -14,7 +14,10 @@ never places trades.
 3. Computes annualized return on capital for every candidate.
 4. Picks the single best strike per ticker, ranks across tickers, keeps the
    top N (`scoring.max_results` in config).
-5. Sends the list to your phone via a **Telegram bot**.
+5. Renders the picks as a table image (via matplotlib) and sends it to your
+   phone via a **Telegram bot**. If image rendering or sending fails for any
+   reason, it automatically falls back to a plain-text monospace table so
+   you still get notified.
 6. Runs automatically every weekday morning via **GitHub Actions** — no
    laptop required to be on.
 
