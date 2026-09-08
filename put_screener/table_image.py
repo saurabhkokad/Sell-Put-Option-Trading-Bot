@@ -28,19 +28,24 @@ _COLUMNS = [
     "IV%",
     "Ann%",
     "OI",
-    "Spread%",
-    "Capital",
+    "Spread",
 ]
 _HEADER_COLOR = "#2c3e50"
 _HEADER_TEXT_COLOR = "white"
 _ROW_COLORS = ["#ffffff", "#f2f2f2"]
 _ROW_HEIGHT = 0.6
-_FONT_SIZE = 11
+_FONT_SIZE = 15
+_DPI = 100
+
+
+def _format_spread(o: PutOpportunity) -> str:
+    spread_dollars = o.ask - o.bid
+    spread_pct = spread_dollars / o.mid * 100 if o.mid > 0 else 0.0
+    return f"${spread_dollars:.2f} / {spread_pct:.1f}%"
 
 
 def _row_values(o: PutOpportunity) -> list[str]:
     exp_short = datetime.strptime(o.expiration, "%Y-%m-%d").strftime("%m/%d")
-    spread_pct = (o.ask - o.bid) / o.mid * 100 if o.mid > 0 else 0.0
     return [
         o.symbol,
         f"${o.underlying_price:,.2f}",
@@ -52,8 +57,7 @@ def _row_values(o: PutOpportunity) -> list[str]:
         f"{o.iv * 100:.0f}%",
         f"{o.annualized_return_pct:.1f}%",
         f"{o.open_interest:,}",
-        f"{spread_pct:.1f}%",
-        f"${o.capital_required:,.0f}",
+        _format_spread(o),
     ]
 
 
@@ -61,14 +65,14 @@ def render_table_image(opportunities: list[PutOpportunity]) -> bytes:
     rows = [_row_values(o) for o in opportunities]
     n_rows = len(rows)
 
-    fig_width = 1.1 * len(_COLUMNS)
-    fig_height = 1.0 + n_rows * (_ROW_HEIGHT * 0.3)
+    fig_width = 0.95 * len(_COLUMNS)
+    fig_height = 1.0 + n_rows * (_ROW_HEIGHT * 0.35)
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     ax.axis("off")
 
     ax.set_title(
         f"Put Screener - {date.today().isoformat()}",
-        fontsize=14,
+        fontsize=18,
         fontweight="bold",
         pad=14,
     )
@@ -93,7 +97,7 @@ def render_table_image(opportunities: list[PutOpportunity]) -> bytes:
             cell.set_facecolor(_ROW_COLORS[row % 2])
 
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=200, bbox_inches="tight")
+    fig.savefig(buf, format="png", dpi=_DPI, bbox_inches="tight")
     plt.close(fig)
     buf.seek(0)
     return buf.read()

@@ -26,10 +26,10 @@ _COLUMNS = (
     "IV%",
     "ANN%",
     "OI",
+    "SPRD$",
     "SPRD%",
-    "CAPITAL",
 )
-_ROW_FORMAT = "{:<5} {:>5} {:>5} {:>4} {:>3} {:>5} {:>4} {:>3} {:>5} {:>6} {:>5} {:>8}"
+_ROW_FORMAT = "{:<5} {:>5} {:>5} {:>4} {:>3} {:>5} {:>4} {:>3} {:>5} {:>6} {:>5} {:>5}"
 
 
 def _format_table(opportunities: list[PutOpportunity]) -> str:
@@ -38,7 +38,8 @@ def _format_table(opportunities: list[PutOpportunity]) -> str:
 
     for o in opportunities:
         exp_short = datetime.strptime(o.expiration, "%Y-%m-%d").strftime("%m/%d")
-        spread_pct = (o.ask - o.bid) / o.mid * 100 if o.mid > 0 else 0.0
+        spread_dollars = o.ask - o.bid
+        spread_pct = spread_dollars / o.mid * 100 if o.mid > 0 else 0.0
         rows.append(
             _ROW_FORMAT.format(
                 o.symbol,
@@ -51,8 +52,8 @@ def _format_table(opportunities: list[PutOpportunity]) -> str:
                 f"{o.iv * 100:.0f}",
                 f"{o.annualized_return_pct:.1f}",
                 f"{o.open_interest:,}",
+                f"{spread_dollars:.2f}",
                 f"{spread_pct:.1f}",
-                f"{o.capital_required:,.0f}",
             )
         )
 
