@@ -147,13 +147,6 @@ single contract on a mega-cap name can already run $20K-$60K+.
 
 - **This is a screener, not an auto-trader.** It never places orders. You
   review the picks and decide whether/how to act.
-- **Your stated goal (30-40% annual return on $100K via cash-secured puts)
-  is aggressive.** Premium-selling income of that scale generally requires
-  either concentrating in higher-volatility (higher-risk) names or deploying
-  most of your capital with little cash buffer — both increase the odds of a
-  large assignment or drawdown in a sharp selloff. Treat the annualized
-  return numbers as gross, before-tax, before-assignment-risk figures, not a
-  guaranteed yield.
 - **IV filter is absolute, not IV Rank.** True IV Rank/Percentile needs a
   paid historical-IV data feed. `min_iv` here is a flat implied-volatility
   floor, not "IV relative to this stock's own 52-week range." A name can
