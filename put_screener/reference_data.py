@@ -11,7 +11,11 @@ import logging
 import threading
 from datetime import date, datetime
 
+import numpy as np
 import yfinance as yf
+
+_HV_WINDOW_DAYS = 20
+_TRADING_DAYS_PER_YEAR = 252
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +39,23 @@ def get_market_cap(symbol: str) -> float | None:
         return float(cap) if cap else None
     except Exception as exc:  # yfinance can raise a variety of network/parse errors
         log.warning("market cap lookup failed for %s: %s", symbol, exc)
+        return None
+
+
+def get_historical_volatility(symbol: str, window: int = _HV_WINDOW_DAYS) -> float | None:
+    """Trailing realized volatility, annualized, as a decimal (e.g. 0.42 for 42%)."""
+    symbol = _to_yfinance_symbol(symbol)
+    try:
+        with _YFINANCE_LOCK:
+            hist = yf.Ticker(symbol).history(period=f"{window + 10}d")
+        closes = hist["Close"].dropna()
+        if len(closes) < window + 1:
+            return None
+        log_returns = np.log(closes / closes.shift(1)).dropna()
+        daily_std = log_returns.tail(window).std()
+        return float(daily_std * np.sqrt(_TRADING_DAYS_PER_YEAR))
+    except Exception as exc:
+        log.warning("historical volatility lookup failed for %s: %s", symbol, exc)
         return None
 
 

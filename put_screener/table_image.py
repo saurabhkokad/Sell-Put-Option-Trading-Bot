@@ -25,7 +25,7 @@ _COLUMNS = [
     "DTE",
     "Bid",
     "Delta",
-    "IV%",
+    "IV / HV (ratio)",
     "Ann%",
     "OI",
     "Spread",
@@ -51,6 +51,15 @@ def _format_spread(o: PutOpportunity) -> str:
     return f"${spread_dollars:.2f} / {spread_pct:.1f}%"
 
 
+def _format_iv_hv(o: PutOpportunity) -> str:
+    iv_pct = o.iv * 100
+    if o.hv is None or o.hv <= 0:
+        return f"{iv_pct:.0f}% / n/a"
+    hv_pct = o.hv * 100
+    ratio = o.iv / o.hv
+    return f"{iv_pct:.0f}% / {hv_pct:.0f}% ({ratio:.1f}x)"
+
+
 def _row_values(o: PutOpportunity) -> list[str]:
     exp_short = datetime.strptime(o.expiration, "%Y-%m-%d").strftime("%m/%d")
     return [
@@ -61,7 +70,7 @@ def _row_values(o: PutOpportunity) -> list[str]:
         str(o.dte),
         f"${o.bid:.2f}",
         f"{o.delta:.2f}",
-        f"{o.iv * 100:.0f}%",
+        _format_iv_hv(o),
         f"{o.annualized_return_pct:.1f}%",
         f"{o.open_interest:,}",
         _format_spread(o),

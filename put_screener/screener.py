@@ -8,7 +8,11 @@ from datetime import date
 
 from .alpaca_client import AlpacaClient
 from .config import Config
-from .reference_data import get_market_cap, get_next_earnings_date
+from .reference_data import (
+    get_historical_volatility,
+    get_market_cap,
+    get_next_earnings_date,
+)
 from .util import dte
 
 log = logging.getLogger(__name__)
@@ -28,6 +32,7 @@ class PutOpportunity:
     mid: float
     delta: float
     iv: float
+    hv: float | None
     open_interest: int
     volume: int
     annualized_return_pct: float
@@ -59,6 +64,8 @@ def _screen_symbol(
     earnings_date: date | None = None
     if cfg.avoid_earnings_before_expiration:
         earnings_date = get_next_earnings_date(symbol)
+
+    hv = get_historical_volatility(symbol)
 
     try:
         expirations = client.get_expirations(symbol)
@@ -136,6 +143,7 @@ def _screen_symbol(
                     mid=(bid + ask) / 2,
                     delta=float(delta),
                     iv=float(iv),
+                    hv=hv,
                     open_interest=open_interest,
                     volume=volume,
                     annualized_return_pct=annualized_return_pct,

@@ -24,12 +24,16 @@ _COLUMNS = (
     "BID",
     "DLT",
     "IV%",
+    "HV%",
+    "RATIO",
     "ANN%",
     "OI",
     "SPRD$",
     "SPRD%",
 )
-_ROW_FORMAT = "{:<5} {:>5} {:>5} {:>4} {:>3} {:>5} {:>4} {:>3} {:>5} {:>6} {:>5} {:>5}"
+_ROW_FORMAT = (
+    "{:<5} {:>5} {:>5} {:>4} {:>3} {:>5} {:>4} {:>3} {:>4} {:>5} {:>5} {:>6} {:>5} {:>5}"
+)
 
 
 def _format_table(opportunities: list[PutOpportunity]) -> str:
@@ -40,6 +44,8 @@ def _format_table(opportunities: list[PutOpportunity]) -> str:
         exp_short = datetime.strptime(o.expiration, "%Y-%m-%d").strftime("%m/%d")
         spread_dollars = o.ask - o.bid
         spread_pct = spread_dollars / o.mid * 100 if o.mid > 0 else 0.0
+        hv_str = f"{o.hv * 100:.0f}" if o.hv is not None and o.hv > 0 else "n/a"
+        ratio_str = f"{o.iv / o.hv:.1f}" if o.hv is not None and o.hv > 0 else "n/a"
         rows.append(
             _ROW_FORMAT.format(
                 o.symbol,
@@ -50,6 +56,8 @@ def _format_table(opportunities: list[PutOpportunity]) -> str:
                 f"{o.bid:.2f}",
                 f"{o.delta:.2f}",
                 f"{o.iv * 100:.0f}",
+                hv_str,
+                ratio_str,
                 f"{o.annualized_return_pct:.1f}",
                 f"{o.open_interest:,}",
                 f"{spread_dollars:.2f}",
